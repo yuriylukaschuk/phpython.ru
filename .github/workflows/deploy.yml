@@ -38,7 +38,7 @@ jobs: # Задачи, которые выполнятся
           [ -f .env ] && cp .env .env.backup
 
           # 2. Очищаем место если нужно
-          apt-get clean
+          apt clean
           composer clear-cache
 
           # 3. Проверяем наличие Git репозитория
