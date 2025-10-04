@@ -1,0 +1,84 @@
+name: Deploy to Production Server # Название workflow
+
+on: # Запускать workflow при пуше в ветку main
+  push:
+    branches: [ "main" ]
+
+jobs: # Задачи, которые выполнятся
+  deploy: # Название задачи (одна задача - один job)
+    runs-on: ubuntu-latest # На какой ОС запускать
+
+    steps: # Шаги, которые выполнит job
+    # Шаг 1: Получить код из репозитория
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Шаг 2: Установить SSH-ключ для подключения к серверу
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    # Шаг 3: Выполнить команды на сервере через SSH
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        port: ${{ secrets.SSH_PORT }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          # Команды, которые выполнятся на вашем сервере:
+
+          # 1. Переходим в папку проекта
+          cd /var/www/phpython.ru
+          # sudo su
+
+          # Сохраняем .env
+          [ -f .env ] && cp .env .env.backup
+
+          # 2. Очищаем место если нужно
+          apt-get clean
+          composer clear-cache
+
+          # 3. Проверяем наличие Git репозитория
+          if [ ! -d ".git" ]; then
+            echo "Git repository not found, initializing..."
+            git init
+            git remote add origin https://github.com/yuriylukaschuk/phpython.ru
+          fi
+
+          # 4. Сохраняем текущий симлинк если существует
+          if [ -L "public/storage" ]; then
+            rm public/storage
+          fi
+
+          # 5. Получаем последние изменения из GitHub
+          git fetch --all
+          git reset --hard origin/main
+          git checkout main --force
+          git submodule update --init --recursive
+
+          # ОЧИСТКА ВСЕХ КЕШЕЙ
+          echo "Cleaning caches..."
+          rm -rf node_modules/.cache
+
+          # Восстанавливаем .env
+          [ -f .env.backup ] && mv .env.backup .env
+
+          # 8. (Опционально) Для Laravel: обновляем кэш конфига, видов и т.д.
+          php artisan optimize:clear
+          # php artisan migrate --force
+
+          # Очистка кеша Laravel
+          php artisan optimize:clear
+          php artisan view:clear
+          php artisan config:clear
+          php artisan cache:clear
+
+          # 10. (Для Nginx) Перезагружаем сервер, если нужно
+          sudo systemctl restart nginx
+
+          № 11. Ответ от сервера
+          echo "Deployment full completed successfully"
+
