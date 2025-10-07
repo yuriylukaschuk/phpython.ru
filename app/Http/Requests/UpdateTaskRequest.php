@@ -26,7 +26,7 @@ class UpdateTaskRequest extends FormRequest
 		return [
 			'title' => 'required|string|max:64',
 			'description' => 'nullable|string|max:255',
-			'status' => 'required|in:created,progress,suspended,completed,returned,canceled',
+			'status' => 'required|in:pending,created,progress,suspended,completed,returned,canceled',
 		];
 	}
 
