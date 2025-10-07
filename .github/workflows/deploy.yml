@@ -32,7 +32,7 @@ jobs: # Задачи, которые выполнятся
 
           # 1. Переходим в папку проекта
           cd /var/www/phpython.ru
-          # sudo su
+          sudo su
 
           # Сохраняем .env
           [ -f .env ] && cp .env .env.backup
