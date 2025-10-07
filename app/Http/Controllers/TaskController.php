@@ -15,13 +15,10 @@ class TaskController extends Controller
 	/**
 	 * Создание задачи: POST /tasks (поля: title, description, status)
 	 */
-	public function store(StoreTaskRequest $request): JsonResponse
+	public function store(StoreTaskRequest $request): TaskResource
 	{
 		$task = Task::create($request->validated());
-		return response()->json([
-			'data' => $task,
-			'message' => 'Task created successfully'
-		], 201);
+		return new TaskResource($task);
 	}
 
 	/**
