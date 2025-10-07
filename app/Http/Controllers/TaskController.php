@@ -12,54 +12,54 @@ use Illuminate\Http\Request;
 class TaskController extends Controller
 {
 
-    /**
-     * Создание задачи: POST /tasks (поля: title, description, status)
-     */
-    public function store(StoreTaskRequest $request): TaskResource
-    {
+	/**
+	 * Создание задачи: POST /tasks (поля: title, description, status)
+	 */
+	public function store(StoreTaskRequest $request): TaskResource
+	{
 		$task = Task::create($request->validated());
-        return new TaskResource($task);
-    }
+		return new TaskResource($task);
+	}
 
 	/**
-     * Просмотр списка задач: GET /tasks (возвращает все задачи).
-     */
-    public function index(): JsonResponse
-    {
-        $tasks = Task::all();
+	 * Просмотр списка задач: GET /tasks (возвращает все задачи).
+	 */
+	public function index(): JsonResponse
+	{
+		$tasks = Task::all();
 		return response()->json([
-            'data' => $tasks,
-            'message' => 'Tasks retrieved successfully'
-        ]);
-    }
+			'data' => $tasks,
+			'message' => 'Tasks retrieved successfully'
+		]);
+	}
 
-    /**
-     * Просмотр одной задачи: GET /tasks/{id}.
-     */
-    public function show(Task $task)
-    {
+	/**
+	 * Просмотр одной задачи: GET /tasks/{id}.
+	 */
+	public function show(Task $task)
+	{
 		return new TaskResource($task);
-    }
+	}
 
-    /**
-     * Обновление задачи: PUT /tasks/{id}.
-     */
-    public function update(UpdateTaskRequest $request, Task $task)
-    {
-        $task->update($request->validated());
+	/**
+	 * Обновление задачи: PUT /tasks/{id}.
+	 */
+	public function update(UpdateTaskRequest $request, Task $task)
+	{
+		$task->update($request->validated());
 
-        return new TaskResource($task);
-    }
+		return new TaskResource($task);
+	}
 
-    /**
-     * Удаление задачи: DELETE /tasks/{id}.
-     */
-    public function destroy(Task $task): JsonResponse
-    {
+	/**
+	 * Удаление задачи: DELETE /tasks/{id}.
+	 */
+	public function destroy(Task $task): JsonResponse
+	{
 		$task->delete();
 
 		return response()->json([
-            'message' => 'Задача удалена'
-        ], 200);
-    }
+			'message' => 'Задача удалена'
+		], 200);
+	}
 }
