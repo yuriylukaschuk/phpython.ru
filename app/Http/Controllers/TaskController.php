@@ -2,36 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
-use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class TaskController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request): AnonymousResourceCollection
-    {
-        $query = Task::query();
-
-		// Сортировка
-        $sortField = $request->get('sort', 'created_at');
-        $sortDirection = $request->get('direction', 'desc');
-        $query->orderBy($sortField, $sortDirection);
-
-        // Пагинация
-        $articles = $query->paginate($request->get('per_page', 15));
-
-        return ArticleResource::collection($articles);
-    }
 
     /**
-     * Store a newly created resource in storage.
+     * Создание задачи: POST /tasks (поля: title, description, status)
      */
     public function store(StoreTaskRequest $request): TaskResource
     {
@@ -39,35 +21,45 @@ class TaskController extends Controller
         return new TaskResource($task);
     }
 
-    /**
-     * Display the specified resource.
+	/**
+     * Просмотр списка задач: GET /tasks (возвращает все задачи).
      */
-    public function show(Task $task): TaskResource
+    public function index(): JsonResponse
     {
-        $task->load('comments');
-
-        return new ArticleResource($task);
+        $tasks = Task::all();
+		return response()->json([
+            'data' => $tasks,
+            'message' => 'Tasks retrieved successfully'
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Просмотр одной задачи: GET /tasks/{id}.
      */
-    public function update(UpdateTaskRequest $request, Task $task): TaskResource
+    public function show(Task $task)
+    {
+		return new TaskResource($task);
+    }
+
+    /**
+     * Обновление задачи: PUT /tasks/{id}.
+     */
+    public function update(UpdateTaskRequest $request, Task $task)
     {
         $task->update($request->validated());
 
-        return new ArticleResource($task);
+        return new TaskResource($task);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Удаление задачи: DELETE /tasks/{id}.
      */
     public function destroy(Task $task): JsonResponse
     {
-        $task->delete();
+		$task->delete();
 
 		return response()->json([
-            'message' => 'Task deleted successfully'
+            'message' => 'Задача удалена'
         ], 200);
     }
 }
