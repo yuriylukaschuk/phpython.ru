@@ -17,12 +17,7 @@ class TaskController extends Controller
 	 */
 	public function store(StoreTaskRequest $request): JsonResponse
 	{
-		\Log::info('Raw request data:', $request->all());
-
 		$task = Task::create($request->validated());
-
-		\Log::info('Created task:', $task->toArray());
-		
 		return response()->json([
 			'data' => $task,
 			'message' => 'Task created successfully'
